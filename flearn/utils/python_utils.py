@@ -3,4 +3,3 @@ def add_lists_of_lists(l):
            [c, d]]
     return: [a+c, b+d] 
     '''
-    

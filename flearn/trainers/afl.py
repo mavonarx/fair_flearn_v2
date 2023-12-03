@@ -10,7 +10,7 @@ from flearn.utils.model_utils import batch_data, gen_batch, gen_epoch, project
 class Server(BaseFedarated):
     def __init__(self, params, learner, dataset):
         print('Using agnostic flearn (non-stochastic version) to Train')
-        self.inner_opt = tf.train.AdagradOptimizer(params['learning_rate'])
+        self.inner_opt = tf.compat.v1.train.AdagradOptimizer(params['learning_rate'])
         super(Server, self).__init__(params, learner, dataset)
         self.latest_lambdas = np.ones(len(self.clients)) * 1.0 / len(self.clients)
         self.resulting_model = self.client_model.get_params()  # this is only for the agnostic flearn paper

@@ -16,23 +16,23 @@ class Model(object):
         # create computation graph        
         self.graph = tf.Graph()
         with self.graph.as_default():
-            tf.set_random_seed(123+seed)
+            tf.compat.v1.set_random_seed(123+seed)
             self.features, self.labels, self.train_op, self.grads, self.eval_metric_ops, self.loss, self.predictions = self.create_model(q, optimizer)
-            self.saver = tf.train.Saver()
-        self.sess = tf.Session(graph=self.graph)
+            self.saver = tf.compat.v1.train.Saver()
+        self.sess = tf.compat.v1.Session(graph=self.graph)
 
         # find memory footprint and compute cost of the model
         self.size = graph_size(self.graph)
         with self.graph.as_default():
-            self.sess.run(tf.global_variables_initializer())
-            metadata = tf.RunMetadata()
-            opts = tf.profiler.ProfileOptionBuilder.float_operation()
-            self.flops = tf.profiler.profile(self.graph, run_meta=metadata, cmd='scope', options=opts).total_float_ops
+            self.sess.run(tf.compat.v1.global_variables_initializer())
+            metadata = tf.compat.v1.RunMetadata()
+            opts = tf.compat.v1.profiler.ProfileOptionBuilder.float_operation()
+            self.flops = tf.compat.v1.profiler.profile(self.graph, run_meta=metadata, cmd='scope', options=opts).total_float_ops
     
     def create_model(self, q, optimizer):
         """Model function for Logistic Regression."""
-        features = tf.placeholder(tf.float32, shape=[None, 100], name='features')
-        labels = tf.placeholder(tf.float32, shape=[None, 1], name='labels')
+        features = tf.compat.v1.placeholder(tf.float32, shape=[None, 100], name='features')
+        labels = tf.compat.v1.placeholder(tf.float32, shape=[None, 1], name='labels')
         
         W = tf.Variable(tf.zeros([100,1]))
         b = tf.Variable(tf.zeros([1]))
@@ -42,20 +42,20 @@ class Model(object):
 
         grads_and_vars = optimizer.compute_gradients(loss)
         grads, _ = zip(*grads_and_vars)
-        train_op = optimizer.apply_gradients(grads_and_vars, global_step=tf.train.get_global_step())
-        eval_metric_ops = tf.count_nonzero(tf.equal(labels, tf.sign(y_pred)))
+        train_op = optimizer.apply_gradients(grads_and_vars, global_step=tf.compat.v1.train.get_global_step())
+        eval_metric_ops = tf.math.count_nonzero(tf.equal(labels, tf.sign(y_pred)))
         return features, labels, train_op, grads, eval_metric_ops, loss, tf.sign(y_pred)
 
     def set_params(self, model_params=None):
         if model_params is not None:
             with self.graph.as_default():
-                all_vars = tf.trainable_variables()
+                all_vars = tf.compat.v1.trainable_variables()
                 for variable, value in zip(all_vars, model_params):
                     variable.load(value, self.sess)
 
     def get_params(self):
         with self.graph.as_default():
-            model_params = self.sess.run(tf.trainable_variables())
+            model_params = self.sess.run(tf.compat.v1.trainable_variables())
         return model_params
 
     def get_gradients(self, data, model_len):

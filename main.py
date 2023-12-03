@@ -147,7 +147,7 @@ def read_options():
 
 def main():
     # suppress tf warnings
-    tf.logging.set_verbosity(tf.logging.WARN)
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.WARN)
     
     # parse command line arguments
     options, learner, optimizer = read_options()
